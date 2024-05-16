@@ -1,0 +1,18 @@
+[package]
+name = "mojxml"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+resolver = "2"
+members = ["mojxml-cli"]
+
+[dependencies]
+geo = { version = "0.28.0", optional = true }
+hashbrown = "0.14.5"
+quick-xml = "0.31.0"
+thiserror = "1.0.60"
+zip = { version = "1.2.3", optional = true }
+
+[features]
+zip = ["dep:zip"]
