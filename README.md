@@ -1,12 +1,14 @@
 # mojxml-rs
 
-An experimental MOJXML-to-FlatGeobuf converter written in Rust.
+An experimental MOJXML parser and converter written in Rust.
+
+License: MIT
+
+## Convert to FlatGeobuf
 
 ```
 cargo run --package mojxml-cli --release -- 15222-1107-2023.zip output.fgb
 ```
-
-License: MIT
 
 ## Acknowledgements
 
