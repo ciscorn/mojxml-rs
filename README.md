@@ -14,8 +14,8 @@ cargo run --package mojxml-cli --release -- 15222-1107-2023.zip output.fgb
 
 Input: [15222-1107-2023.zip](https://www.geospatial.jp/ckan/dataset/houmusyouchizu-2024-1-824), excluding no-crs data
 
-- mojxml-rs: **8.30s**
-- [mojxml-py](https://github.com/MIERUNE/mojxml-py): 71.2s
+- mojxml-rs: **7.46s**
+- [mojxml-py](https://github.com/MIERUNE/mojxml-py): 56.4s
 
 ## TODO
 

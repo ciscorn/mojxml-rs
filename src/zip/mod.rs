@@ -27,7 +27,7 @@ impl<R: Read + Seek> ZipPackageIter<R> {
             if let Some(inner_zip) = &mut self.inner_zip {
                 if self.inner_index < inner_zip.len() {
                     let mut inner_file = inner_zip.by_index(self.inner_index)?;
-                    let mut inner = Cursor::new(Vec::new());
+                    let mut inner = Cursor::new(Vec::with_capacity(inner_file.size() as usize));
                     std::io::copy(&mut inner_file, &mut inner)?;
                     let name = inner_file.name().to_string();
                     self.inner_index += 1;
@@ -46,13 +46,13 @@ impl<R: Read + Seek> ZipPackageIter<R> {
             let mut inner_file = self.zip.by_index(self.index)?;
             match inner_file.name().rsplit_once('.') {
                 Some((_, "zip")) => {
-                    let mut inner = Cursor::new(Vec::new());
+                    let mut inner = Cursor::new(Vec::with_capacity(inner_file.size() as usize));
                     std::io::copy(&mut inner_file, &mut inner)?;
                     inner.rewind()?;
                     self.inner_zip = Some(zip::ZipArchive::new(inner)?);
                 }
                 Some((_, "xml")) => {
-                    let mut inner = Cursor::new(Vec::new());
+                    let mut inner = Cursor::new(Vec::with_capacity(inner_file.size() as usize));
                     std::io::copy(&mut inner_file, &mut inner)?;
                     self.index += 1;
                     return Ok(Some((inner_file.name().to_string(), inner.into_inner())));
@@ -122,7 +122,7 @@ mod parallel {
             zip: zip::ZipArchive<R>,
             sender: mpsc::SyncSender<zip::result::ZipResult<(String, Vec<u8>)>>,
         ) {
-            fn process(
+            fn process_inner_zip(
                 name: String,
                 inner_data: Vec<u8>,
             ) -> zip::result::ZipResult<Option<(String, Vec<u8>)>> {
@@ -133,7 +133,7 @@ mod parallel {
                         let mut xml = inner_zip.by_index(0)?;
                         let name = xml.name().to_string();
                         if name.ends_with(".xml") {
-                            let mut cursor = Cursor::new(Vec::new());
+                            let mut cursor = Cursor::new(Vec::with_capacity(xml.size() as usize));
                             std::io::copy(&mut xml, &mut cursor).unwrap();
                             Ok(Some((name, cursor.into_inner())))
                         } else {
@@ -161,9 +161,8 @@ mod parallel {
                         }
                         Ok(inner_file) => inner_file,
                     };
-                    inner_file.size();
                     let filename = inner_file.name().to_string();
-                    let mut cursor = Cursor::new(Vec::new());
+                    let mut cursor = Cursor::new(Vec::with_capacity(inner_file.size() as usize));
                     if let Err(e) = std::io::copy(&mut inner_file, &mut cursor) {
                         if sender.send(Err(e.into())).is_err() {
                             return Err(());
@@ -171,7 +170,7 @@ mod parallel {
                     };
                     let inner_data = cursor.into_inner();
 
-                    match process(filename, inner_data) {
+                    match process_inner_zip(filename, inner_data) {
                         Ok(Some((name, data))) => {
                             if sender.send(Ok((name, data))).is_err() {
                                 return Err(());
