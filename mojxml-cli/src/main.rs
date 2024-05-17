@@ -1,13 +1,14 @@
 use std::fs::File;
-use std::io::{BufReader, Cursor};
+use std::io::Cursor;
 use std::path::PathBuf;
 use std::sync::RwLock;
 use std::time::Instant;
 
 use clap::Parser;
 
+use flatgeobuf::geozero::PropertyProcessor;
 use flatgeobuf::{ColumnType, GeometryType};
-use geozero::{ColumnValue, PropertyProcessor};
+use geozero::ColumnValue;
 use rayon::prelude::*;
 
 #[derive(Parser)]
@@ -24,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     let inst = Instant::now();
-    let zip = mojxml::zip::ZipPackage::new(BufReader::new(File::open(args.input_zip)?))?;
+    let zip = mojxml::zip::ZipPackageParallelIter::new(File::open(args.input_zip)?)?;
 
     let mut fgb = flatgeobuf::FgbWriter::create_with_options(
         "mojxml",
@@ -54,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let fgb_rw = RwLock::new(fgb);
 
     zip.par_bridge().try_for_each(|res| match res {
-        Err(e) => Err(e.into()),
+        Err(e) => Err(std::io::Error::new(std::io::ErrorKind::InvalidData, e).into()),
         Ok((name, data)) => {
             eprintln!("File: {}", name);
 
@@ -132,11 +133,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     })?;
 
-    println!("Elapsed time: {:?}", inst.elapsed());
-
     // Write .fgb file
+    eprintln!("Writing .fgb file...");
     let fgb = fgb_rw.into_inner().unwrap();
     let file = std::fs::File::create(args.output_fgb)?;
     fgb.write(file)?;
+
+    eprintln!("Elapsed time: {:?}", inst.elapsed());
     Ok(())
 }

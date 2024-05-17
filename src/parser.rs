@@ -89,14 +89,14 @@ impl<R: BufRead> MojxmlParser<R> {
             match self.reader.read_event_into(&mut self.buf)? {
                 Event::Text(text) => return Ok(text.unescape()?.into_owned()),
                 Event::Start(_) => {
-                    return Err(Error::InvalidData(format!(
-                        "Expected text but found a start tag",
-                    )));
+                    return Err(Error::InvalidData(
+                        "Expected text but found a start tag".to_string(),
+                    ));
                 }
                 Event::End(_) => {
-                    return Err(Error::InvalidData(format!(
-                        "Expected text but found an end tag",
-                    )));
+                    return Err(Error::InvalidData(
+                        "Expected text but found an end tag".to_string(),
+                    ));
                 }
                 _ => {}
             }

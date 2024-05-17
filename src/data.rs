@@ -14,31 +14,31 @@ pub struct Fude {
 
 #[derive(Default, Debug)]
 pub struct FudeAttributes {
-    // 筆ID
+    /// 筆ID
     pub id: String,
-    // 大字コード
+    /// 大字コード
     pub oaza_code: Option<String>,
-    // 丁目コード
+    /// 丁目コード
     pub chome_code: Option<String>,
-    // 小字コード
+    /// 小字コード
     pub koaza_code: Option<String>,
-    // 予備コード
+    /// 予備コード
     pub yobi_code: Option<String>,
-    // 大字名
+    /// 大字名
     pub oaza: Option<String>,
-    // 丁目名
+    /// 丁目名
     pub chome: Option<String>,
-    // 小字名
+    /// 小字名
     pub koaza: Option<String>,
-    // 予備名
+    /// 予備名
     pub yobi: Option<String>,
-    // 地番
+    /// 地番
     pub chiban: Option<String>,
-    // 筆界未定構成筆
+    /// 筆界未定構成筆
     pub hikkai_mitei: Option<String>,
-    // 精度区分
+    /// 精度区分
     pub accuracy_class: Option<String>,
-    // 座標値種別
+    /// 座標値種別
     pub coord_class: Option<String>,
 }
 

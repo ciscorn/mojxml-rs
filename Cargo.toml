@@ -8,11 +8,16 @@ resolver = "2"
 members = ["mojxml-cli"]
 
 [dependencies]
-geo = { version = "0.28.0", optional = true }
-hashbrown = "0.14.5"
-quick-xml = "0.31.0"
-thiserror = "1.0.60"
-zip = { version = "1.2.3", optional = true }
+geo = { version = "0.28", optional = true }
+hashbrown = "0.14"
+quick-xml = "0.31"
+rayon = { version = "1.10", optional = true }
+thiserror = "1.0"
+zip = { version = "1.2", optional = true }
 
 [features]
+default = ["geo", "zip", "rayon"]
 zip = ["dep:zip"]
+
+[dev-dependencies]
+test-log = "0.2.16"
