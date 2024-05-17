@@ -10,6 +10,17 @@ License: MIT
 cargo run --package mojxml-cli --release -- 15222-1107-2023.zip output.fgb
 ```
 
+## Benchmark
+
+Input: [15222-1107-2023.zip](https://www.geospatial.jp/ckan/dataset/houmusyouchizu-2024-1-824)
+
+- mojxml-rs: **8.30s**
+- [mojxml-py](https://github.com/MIERUNE/mojxml-py): 71.2s
+
+## TODO
+
+- CRS (Coordinate Reference System) conversion
+
 ## Acknowledgements
 
 - For multi-threaded Zip file extraction, we use `cloneable_seekable_reader.rs` from [google/ripunzip](https://github.com/google/ripunzip).
