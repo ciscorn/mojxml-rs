@@ -12,14 +12,14 @@ cargo run --package mojxml-cli --release -- 15222-1107-2023.zip output.fgb
 
 ## Benchmark
 
-Input: [15222-1107-2023.zip](https://www.geospatial.jp/ckan/dataset/houmusyouchizu-2024-1-824)
+Input: [15222-1107-2023.zip](https://www.geospatial.jp/ckan/dataset/houmusyouchizu-2024-1-824), excluding no-crs data
 
 - mojxml-rs: **8.30s**
 - [mojxml-py](https://github.com/MIERUNE/mojxml-py): 71.2s
 
 ## TODO
 
-- CRS (Coordinate Reference System) conversion
+- CRS conversion from "Japan Plane Recutangular" to WGS84
 
 ## Acknowledgements
 
