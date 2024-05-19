@@ -19,7 +19,7 @@ Input: [15222-1107-2023.zip](https://www.geospatial.jp/ckan/dataset/houmusyouchi
 
 ## TODO
 
-- CRS conversion from "Japan Plane Recutangular" to WGS84
+- CRS conversion from "Japan Plane Rectangular" to WGS84
 
 ## Acknowledgements
 
