@@ -1,7 +1,8 @@
 use std::io::BufRead;
 
 use hashbrown::HashMap;
-use quick_xml::{events::Event, Reader};
+use jprect::etmerc::ExtendedTransverseMercatorProjection;
+use quick_xml::{Reader, events::Event};
 use thiserror::Error;
 
 use crate::data::{Fude, FudeAttributes, ParsedData, Point, PointRef};
@@ -18,7 +19,7 @@ pub enum Error {
     SkipAll,
 }
 
-pub struct MojxmlParser<R: BufRead> {
+pub struct MojxmlParser<'a, R: BufRead> {
     reader: Reader<R>,
     skip_arbitrary_crs: bool,
     buf: Vec<u8>,
@@ -27,14 +28,16 @@ pub struct MojxmlParser<R: BufRead> {
     segments: HashMap<String, [PointRef; 2]>,
     surfaces: HashMap<String, Vec<Vec<String>>>,
     fudes: HashMap<String, Fude>,
+    projection: Option<&'a ExtendedTransverseMercatorProjection>,
+    jpr_projections: &'a [ExtendedTransverseMercatorProjection; 19],
 }
 
-impl<R: BufRead> MojxmlParser<R> {
-    pub fn new(reader: R) -> Self {
+impl<'a, R: BufRead> MojxmlParser<'a, R> {
+    pub fn new(reader: R, projections: &'a [ExtendedTransverseMercatorProjection; 19]) -> Self {
         let mut reader = Reader::from_reader(reader);
-        reader.trim_text(true);
-        reader.check_end_names(true);
-        reader.expand_empty_elements(true);
+        reader.config_mut().trim_text(true);
+        reader.config_mut().check_end_names = true;
+        reader.config_mut().expand_empty_elements = true;
 
         Self {
             reader,
@@ -45,6 +48,8 @@ impl<R: BufRead> MojxmlParser<R> {
             segments: HashMap::new(),
             surfaces: HashMap::new(),
             fudes: HashMap::new(),
+            projection: None,
+            jpr_projections: projections,
         }
     }
 
@@ -123,15 +128,27 @@ impl<R: BufRead> MojxmlParser<R> {
                         b"\xe5\x9b\xb3\xe9\x83\xad" => {
                             self.reader.read_to_end_into(start.name(), &mut self.buf2)?;
                         }
-                        name => {
-                            let key = String::from_utf8_lossy(name);
+                        // 座標系
+                        b"\xe5\xba\xa7\xe6\xa8\x99\xe7\xb3\xbb" => {
+                            let crs_text = self.expect_text()?;
                             // Skip arbitrary coordinate systems
-                            if self.skip_arbitrary_crs && key == "座標系" {
-                                let value = self.expect_text()?;
-                                if value == "任意座標系" {
-                                    return Err(Error::SkipAll);
+                            if self.skip_arbitrary_crs && crs_text == "任意座標系" {
+                                return Err(Error::SkipAll);
+                            }
+                            if let Some(zone_number) = crs_text
+                                .strip_prefix("公共座標")
+                                .and_then(|s| s.strip_suffix("系"))
+                                .and_then(|num_str| num_str.parse::<u8>().ok())
+                            {
+                                if (1..=19).contains(&zone_number) {
+                                    self.projection =
+                                        Some(&self.jpr_projections[zone_number as usize - 1]);
                                 }
                             }
+
+                            level += 1;
+                        }
+                        _ => {
                             level += 1;
                         }
                     }
@@ -268,6 +285,12 @@ impl<R: BufRead> MojxmlParser<R> {
                 Event::End(_) => match mode {
                     Mode::None => match (x, y) {
                         (Some(x), Some(y)) => {
+                            if let Some(projection) = self.projection {
+                                let Ok((x, y, _)) = projection.project_inverse(y, x, 0.0) else {
+                                    return Err(Error::InvalidData( "failed to project a point from Japan Plane Rectangular to lat/lng".to_string()));
+                                };
+                                return Ok([x, y]);
+                            }
                             return Ok([x, y]);
                         }
                         _ => {

@@ -77,7 +77,6 @@ impl<R: Read + Seek> Iterator for ZipPackageIter<R> {
 #[cfg(feature = "rayon")]
 mod parallel {
     use super::cloneable_seekable_reader::CloneableSeekableReader;
-    pub use super::cloneable_seekable_reader::HasLength;
 
     use rayon::iter::{ParallelBridge, ParallelIterator};
     use std::{
@@ -98,13 +97,11 @@ mod parallel {
     }
 
     impl ZipPackageParallelIter {
-        pub fn new<R: Read + Seek + HasLength + Send + 'static>(
-            reader: R,
-        ) -> std::io::Result<Self> {
+        pub fn new<R: Read + Seek + Send + 'static>(reader: R) -> std::io::Result<Self> {
             let clonable_reader = CloneableSeekableReader::new(reader);
             let zip = zip::ZipArchive::new(clonable_reader)?;
 
-            let (sender, receiver) = mpsc::sync_channel(32);
+            let (sender, receiver) = mpsc::sync_channel(100);
 
             std::thread::spawn(|| {
                 rayon::ThreadPoolBuilder::new()

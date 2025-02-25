@@ -1,3 +1,4 @@
+use std::array;
 use std::fs::File;
 use std::io::Cursor;
 use std::path::PathBuf;
@@ -32,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         GeometryType::Polygon,
         flatgeobuf::FgbWriterOptions {
             crs: flatgeobuf::FgbCrs {
-                code: 6676,
+                code: 6668, // JGD2011
                 ..Default::default()
             },
             ..Default::default()
@@ -54,13 +55,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let fgb_rw = RwLock::new(fgb);
 
+    let projections: [jprect::etmerc::ExtendedTransverseMercatorProjection; 19] =
+        array::from_fn(|i| {
+            jprect::JPRZone::from_number(i + 1)
+                .expect("ok")
+                .projection()
+        });
+
     zip.par_bridge().try_for_each(|res| match res {
         Err(e) => Err(std::io::Error::new(std::io::ErrorKind::InvalidData, e).into()),
         Ok((name, data)) => {
             eprintln!("File: {}", name);
 
             let mut reader = Cursor::new(data);
-            let mut parser = mojxml::parser::MojxmlParser::new(&mut reader);
+            let mut parser = mojxml::parser::MojxmlParser::new(&mut reader, &projections);
             parser.skip_arbitrary_crs(true);
 
             match parser.parse() {

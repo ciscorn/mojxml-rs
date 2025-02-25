@@ -106,7 +106,7 @@ impl ParsedData {
                     PointRef::Indirect(ref point_id) => self
                         .points
                         .get(point_id)
-                        .map(|c| geo::Coord { x: c[1], y: c[0] })
+                        .map(|p| geo::Coord { x: p[0], y: p[1] })
                         .ok_or(format!("Point id={} not found", point_id)),
                 },
                 None => Err(format!("Curve if={} not found", segment_id)),

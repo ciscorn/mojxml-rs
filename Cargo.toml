@@ -1,23 +1,30 @@
 [package]
 name = "mojxml"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 resolver = "2"
 members = ["mojxml-cli"]
 
 [dependencies]
-geo = { version = "0.28", optional = true }
-hashbrown = "0.14"
-quick-xml = "0.31"
+geo = { version = "0.29.3", optional = true }
+hashbrown = "0.15"
 rayon = { version = "1.10", optional = true }
-thiserror = "1.0"
-zip = { version = "1.2", optional = true }
+quick-xml = "0.37"
+thiserror = "2.0"
+zip = { version = "2.2", optional = true, features = ["deflate-zlib-ng"], default-features = false }
+jprect = "0.0.4"
 
 [features]
 default = ["geo", "zip", "rayon"]
 zip = ["dep:zip"]
 
 [dev-dependencies]
-test-log = "0.2.16"
+test-log = "0.2.17"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
