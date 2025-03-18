@@ -13,7 +13,7 @@ hashbrown = "0.15"
 rayon = { version = "1.10", optional = true }
 quick-xml = "0.37"
 thiserror = "2.0"
-zip = { version = "2.2", optional = true, features = ["deflate-zlib-ng"], default-features = false }
+zip = { version = "2.3", optional = true, features = ["deflate-zlib-ng"], default-features = false }
 jprect = "0.0.4"
 
 [features]
