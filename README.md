@@ -1,6 +1,6 @@
 # mojxml-rs
 
-An experimental MOJXML parser and converter written in Rust.
+An experimental MOJXML（MOJ 地図XML）parser and converter written in Rust.
 
 License: MIT
 
@@ -23,4 +23,5 @@ Input: [15222-1107-2023.zip](https://www.geospatial.jp/ckan/dataset/houmusyouchi
 
 ## Authors
 
-Taku Fukada ([@ciscorn](https://github.com/ciscorn))
+- Taku Fukada ([@ciscorn](https://github.com/ciscorn)) - Original author
+- And all contributors!
