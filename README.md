@@ -20,8 +20,3 @@ Input: [15222-1107-2023.zip](https://www.geospatial.jp/ckan/dataset/houmusyouchi
 ## Acknowledgements
 
 - For multi-threaded Zip file extraction, we use `cloneable_seekable_reader.rs` from [google/ripunzip](https://github.com/google/ripunzip).
-
-## Authors
-
-- Taku Fukada ([@ciscorn](https://github.com/ciscorn)) - Original author
-- And all contributors!
